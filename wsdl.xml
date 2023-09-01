@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="CreateObject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="ItemFields" type="tns:ArrayOfItemField" />
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessSettingName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessUserName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfItemField">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ItemField" nillable="true" type="tns:ItemField" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemField">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="FieldName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FieldStringValue" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemAgreementBlockField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Blocks" type="tns:ArrayOfProcessBlock" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfProcessBlock">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ProcessBlock" nillable="true" type="tns:ProcessBlock" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ProcessBlock">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IsParallel" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="OrderID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="BlockName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Users" type="tns:ArrayOfProcessUser" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfProcessUser">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ProcessUser" nillable="true" type="tns:ProcessUser" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ProcessUser">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="UserLogin" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="OrderID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="AccessDeletedUser" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemLinkField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="LinkValue" type="tns:ArrayOfLinkValue" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfLinkValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LinkValue" nillable="true" type="tns:LinkValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LinkValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Url" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tip" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemTableField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Value" type="tns:TableValue" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="TableValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Rows" type="tns:ArrayOfTableRowValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTableRowValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TableRowValue" nillable="true" type="tns:TableRowValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TableRowValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfItemField" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemLookupMultiSourceField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfLookupItem" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfLookupItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LookupItem" nillable="true" type="tns:LookupItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LookupItem">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="LookupItemId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="LookupListId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="LookupValue" type="tns:ArrayOfItemField" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemLookupMultiField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfLookupItem" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ItemLookupField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Item" type="tns:LookupItem" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ItemFileField">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ItemField">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Files" type="tns:ArrayOfFileData" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfFileData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FileData" nillable="true" type="tns:FileData" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="FileData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="FileName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FileContent" type="s:base64Binary" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CreateObjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateObjectResult" type="tns:CreateObjectResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CreateObjectResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CreatedItemId" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FindObject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ItemID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="FieldNames" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FindObjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="FindObjectResult" type="tns:FindObjectResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FindObjectResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Item" type="tns:ListItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ListItem">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ItemID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfItemField" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RunImportFromDB">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="listID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="settingKey" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunImportFromDBResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunImportFromDBResult" type="tns:ImportFromDBResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ImportFromDBResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ImportStatus" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Errors" type="tns:ArrayOfImportFromDBError" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CreatedItemsCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdatedItemsCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="DeletedItemsCount" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfImportFromDBError">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ImportFromDBError" nillable="true" type="tns:ImportFromDBError" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ImportFromDBError">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ListName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Identity" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FindObjects">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Query" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="FieldNames" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FindObjectsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="FindObjectsResult" type="tns:FindObjectsResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FindObjectsResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfListItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfListItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ListItem" nillable="true" type="tns:ListItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="UpdateObject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ItemID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfItemField" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateObjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UpdateObjectResult" type="tns:UpdateObjectResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="UpdateObjectResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="DeleteObject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ItemID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteObjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteObjectResult" type="tns:DeleteObjectResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DeleteObjectResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AcceptDocumentSolution">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ListID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="ItemID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="SolutionName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Comment" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AcceptDocumentSolutionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AcceptDocumentSolutionResult" type="tns:AcceptDocumentSolutionResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="AcceptDocumentSolutionResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="OperationResult" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="CreateObjectSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateObject" />
+  </wsdl:message>
+  <wsdl:message name="CreateObjectSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateObjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="FindObjectSoapIn">
+    <wsdl:part name="parameters" element="tns:FindObject" />
+  </wsdl:message>
+  <wsdl:message name="FindObjectSoapOut">
+    <wsdl:part name="parameters" element="tns:FindObjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunImportFromDBSoapIn">
+    <wsdl:part name="parameters" element="tns:RunImportFromDB" />
+  </wsdl:message>
+  <wsdl:message name="RunImportFromDBSoapOut">
+    <wsdl:part name="parameters" element="tns:RunImportFromDBResponse" />
+  </wsdl:message>
+  <wsdl:message name="FindObjectsSoapIn">
+    <wsdl:part name="parameters" element="tns:FindObjects" />
+  </wsdl:message>
+  <wsdl:message name="FindObjectsSoapOut">
+    <wsdl:part name="parameters" element="tns:FindObjectsResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateObjectSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateObject" />
+  </wsdl:message>
+  <wsdl:message name="UpdateObjectSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateObjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteObjectSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteObject" />
+  </wsdl:message>
+  <wsdl:message name="DeleteObjectSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteObjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="AcceptDocumentSolutionSoapIn">
+    <wsdl:part name="parameters" element="tns:AcceptDocumentSolution" />
+  </wsdl:message>
+  <wsdl:message name="AcceptDocumentSolutionSoapOut">
+    <wsdl:part name="parameters" element="tns:AcceptDocumentSolutionResponse" />
+  </wsdl:message>
+  <wsdl:portType name="WSSDocsWebApiSoap">
+    <wsdl:operation name="CreateObject">
+      <wsdl:input message="tns:CreateObjectSoapIn" />
+      <wsdl:output message="tns:CreateObjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FindObject">
+      <wsdl:input message="tns:FindObjectSoapIn" />
+      <wsdl:output message="tns:FindObjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunImportFromDB">
+      <wsdl:input message="tns:RunImportFromDBSoapIn" />
+      <wsdl:output message="tns:RunImportFromDBSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FindObjects">
+      <wsdl:input message="tns:FindObjectsSoapIn" />
+      <wsdl:output message="tns:FindObjectsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateObject">
+      <wsdl:input message="tns:UpdateObjectSoapIn" />
+      <wsdl:output message="tns:UpdateObjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteObject">
+      <wsdl:input message="tns:DeleteObjectSoapIn" />
+      <wsdl:output message="tns:DeleteObjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AcceptDocumentSolution">
+      <wsdl:input message="tns:AcceptDocumentSolutionSoapIn" />
+      <wsdl:output message="tns:AcceptDocumentSolutionSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSSDocsWebApiSoap" type="tns:WSSDocsWebApiSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CreateObject">
+      <soap:operation soapAction="http://tempuri.org/CreateObject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindObject">
+      <soap:operation soapAction="http://tempuri.org/FindObject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunImportFromDB">
+      <soap:operation soapAction="http://tempuri.org/RunImportFromDB" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindObjects">
+      <soap:operation soapAction="http://tempuri.org/FindObjects" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateObject">
+      <soap:operation soapAction="http://tempuri.org/UpdateObject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteObject">
+      <soap:operation soapAction="http://tempuri.org/DeleteObject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AcceptDocumentSolution">
+      <soap:operation soapAction="http://tempuri.org/AcceptDocumentSolution" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSSDocsWebApiSoap12" type="tns:WSSDocsWebApiSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CreateObject">
+      <soap12:operation soapAction="http://tempuri.org/CreateObject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindObject">
+      <soap12:operation soapAction="http://tempuri.org/FindObject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunImportFromDB">
+      <soap12:operation soapAction="http://tempuri.org/RunImportFromDB" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FindObjects">
+      <soap12:operation soapAction="http://tempuri.org/FindObjects" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateObject">
+      <soap12:operation soapAction="http://tempuri.org/UpdateObject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteObject">
+      <soap12:operation soapAction="http://tempuri.org/DeleteObject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AcceptDocumentSolution">
+      <soap12:operation soapAction="http://tempuri.org/AcceptDocumentSolution" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSSDocsWebApi">
+    <wsdl:port name="WSSDocsWebApiSoap" binding="tns:WSSDocsWebApiSoap">
+      <soap:address location="https://doc-test.efko.ru/_LAYOUTS/WSS/WSSC.V4.DMS.WebServices/WSSDocsWebApi.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSSDocsWebApiSoap12" binding="tns:WSSDocsWebApiSoap12">
+      <soap12:address location="https://doc-test.efko.ru/_LAYOUTS/WSS/WSSC.V4.DMS.WebServices/WSSDocsWebApi.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
