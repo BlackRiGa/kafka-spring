@@ -6,7 +6,7 @@ import javax.xml.soap.*;
 
 @Component
 public class SoapMessageFactoryFindObject {
-    public SOAPMessage createSoapRequestFindObject() throws Exception {
+    public SOAPMessage createSoapRequestFindObject(Integer listId, Integer itemId, String valueName) throws Exception {
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage soapMessage = factory.createMessage();
         SOAPPart soapPart = soapMessage.getSOAPPart();
@@ -21,19 +21,18 @@ public class SoapMessageFactoryFindObject {
 
         String listIdElementName = "ListID";
         SOAPElement listIdElement = findObjectElement.addChildElement(listIdElementName, "tem", "http://tempuri.org/");
-        listIdElement.setTextContent("3");
+        listIdElement.setTextContent(String.valueOf(listId));
 
         String itemIdElementName = "ItemID";
         SOAPElement itemIdElement = findObjectElement.addChildElement(itemIdElementName, "tem", "http://tempuri.org/");
-        itemIdElement.setTextContent("2841");
+        itemIdElement.setTextContent(String.valueOf(itemId));
 
         String fieldNamesQName = "FieldNames";
         SOAPElement fieldNamesElement = findObjectElement.addChildElement(fieldNamesQName, "tem", "http://tempuri.org/");
 
         String stringQName = "string";
-        String originalText = "Название"; // Ваш текст в кодировке UTF-8
         SOAPElement stringElement = fieldNamesElement.addChildElement(stringQName, "tem", "http://tempuri.org/");
-        stringElement.setTextContent(originalText);
+        stringElement.setTextContent(valueName);
 
         soapMessage.saveChanges();
 

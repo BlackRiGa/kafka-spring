@@ -13,14 +13,28 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.demo.model.StringValue;
 import ru.demo.service.converter.SoapMessageConverter;
+import ru.demo.service.datahandler.IncomingDataHandler;
+import ru.demo.service.models.CompaniesRequestModel;
+import ru.demo.service.models.DirectionsRequestModel;
+import ru.demo.service.models.DivisionsRequestModel;
+import ru.demo.service.soapMessageFactory.SoapMessageFactoryCreateObject;
+import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObject;
+import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObjects;
+import ru.demo.service.soapMessageFactory.SoapMessageFactoryUpdateObject;
 
 import javax.xml.soap.SOAPMessage;
 import java.io.IOException;
+import java.util.HashMap;
 
 @Service
 public class SoapRequestSender {
     private final SoapMessageConverter soapMessageConverter;
+    private final SoapMessageFactoryFindObjects soapMessageFactoryFindObjects;
+    private final SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject;
+    private final SoapMessageFactoryCreateObject soapMessageFactoryCreateObject;
+    private final IncomingDataHandler dataHandler;
 
     @Value("${wss.host_name}")
     private String host_name;
@@ -34,11 +48,15 @@ public class SoapRequestSender {
     private String addressRequest;
 
     @Autowired
-    public SoapRequestSender(SoapMessageConverter soapMessageConverter) {
+    public SoapRequestSender(SoapMessageConverter soapMessageConverter, SoapMessageFactoryFindObjects soapMessageFactoryFindObjects, SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject, SoapMessageFactoryCreateObject soapMessageFactoryCreateObject, IncomingDataHandler dataHandler) throws Exception {
         this.soapMessageConverter = soapMessageConverter;
+        this.soapMessageFactoryFindObjects = soapMessageFactoryFindObjects;
+        this.soapMessageFactoryUpdateObject = soapMessageFactoryUpdateObject;
+        this.soapMessageFactoryCreateObject = soapMessageFactoryCreateObject;
+        this.dataHandler = dataHandler;
     }
 
-    public String sendSoapRequest(SOAPMessage soapMessage) {
+    private String sendSoapRequest(SOAPMessage soapMessage) {
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(AuthScope.ANY,
                 new NTCredentials(login, password, host_name, domain));
@@ -52,7 +70,7 @@ public class SoapRequestSender {
             byte[] soapBytes = soapMessageConverter.convertSoapMessageToBytes(soapMessage);
             // Устанавливаем заголовки
             post.setHeader("Content-type", "application/soap+xml;charset=UTF-8");
-            post.setHeader("SoapAction", "http://tempuri.org/FindObject"); // Укажите необходимое действие SoapAction
+            post.setHeader("SoapAction", "http://tempuri.org/FindObject"); // действие SoapAction
             // Создаем HttpEntity из массива байтов SOAP-сообщения
             HttpEntity entity = new ByteArrayEntity(soapBytes);
             // Устанавливаем HttpEntity в HttpPost
@@ -70,6 +88,57 @@ public class SoapRequestSender {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return "Error";
+        return "Error in send SoapRequest";
+    }
+
+
+    public void choiceOfMethodAction(StringValue valueStr) throws Exception {
+        String sample = valueStr.value();
+
+        if (valueStr.value().contains("directions")) {
+            System.out.println("choiceOfMethodAction = directions");
+
+            DirectionsRequestModel directions = DirectionsRequestModel.fromJson(sample);
+
+            SOAPMessage soapMessageFound = soapMessageFactoryFindObjects.createSoapRequestFindObjects(453, "Код", directions.getData().get(0).getId());
+            System.out.println("soapMessageFound = " + sendSoapRequest(soapMessageFound));
+
+            if (soapMessageFound.getSOAPBody().getTextContent().contains("Код")) {
+                Integer itemId = 2841;
+                HashMap<String, String> hashValueMapForUpdate = new HashMap<>();
+                hashValueMapForUpdate.put("Название", directions.getData().get(0).getName());
+                SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(453, itemId, hashValueMapForUpdate);
+                System.out.println("soapMessageUpdated" + sendSoapRequest(soapMessageUpdated));
+            } else {
+                SOAPMessage soapMessageCreated = soapMessageFactoryCreateObject.createSoapRequest(453, directions.getData().get(0).getName(), directions.getData().get(0).getPrefix(), directions.getData().get(0).getId(), null, null);
+                System.out.println("soapMessageCreated" + sendSoapRequest(soapMessageCreated));
+            }
+
+
+        } else if (valueStr.value().contains("divisions")) {
+
+
+            System.out.println("choiceOfMethodAction = divisions");
+
+            DivisionsRequestModel divisions = DivisionsRequestModel.fromJson(sample);
+            System.out.println(divisions.getData());
+
+            SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(452, divisions.getData().get(0).getName(), divisions.getData().get(1).getPrefix(), divisions.getData().get(1).getId(), null, null);
+            System.out.println(sendSoapRequest(soapMessage));
+
+
+        } else if (valueStr.value().contains("companies")) {
+
+
+            System.out.println("choiceOfMethodAction = companies");
+
+            CompaniesRequestModel companies = CompaniesRequestModel.fromJson(sample);
+            System.out.println(companies.getData());
+
+            SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(105, companies.getData().get(0).getName(), companies.getData().get(0).getPrefix(), companies.getData().get(0).getId(), companies.getUrl(), companies.getData().get(0).getOrgCodeMdm());
+            System.out.println(sendSoapRequest(soapMessage));
+
+
+        }
     }
 }

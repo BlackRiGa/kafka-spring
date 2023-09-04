@@ -4,10 +4,12 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SoapMessageFactoryUpdateObject {
-    public SOAPMessage createUpdateObjectSoapRequest() throws Exception {
+    public SOAPMessage createUpdateObjectSoapRequest(Integer listId, Integer ItemId, HashMap<String, String> itemValueMap) throws Exception {
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage soapMessage = factory.createMessage();
         SOAPPart soapPart = soapMessage.getSOAPPart();
@@ -23,12 +25,12 @@ public class SoapMessageFactoryUpdateObject {
         // Создание элемента ListID
         QName listIdQName = new QName("http://tempuri.org/", "ListID", "tem");
         SOAPElement listIdElement = updateObjectElement.addChildElement(listIdQName);
-        listIdElement.setTextContent("3");
+        listIdElement.setTextContent(String.valueOf(listId));
 
         // Создание элемента ItemID
         QName itemIdQName = new QName("http://tempuri.org/", "ItemID", "tem");
         SOAPElement itemIdElement = updateObjectElement.addChildElement(itemIdQName);
-        itemIdElement.setTextContent("2841");
+        itemIdElement.setTextContent(String.valueOf(ItemId));
 
         // Создание элемента Fields
         QName fieldsQName = new QName("http://tempuri.org/", "Fields", "tem");
@@ -37,17 +39,17 @@ public class SoapMessageFactoryUpdateObject {
         // Создание элемента ItemField
         QName itemFieldQName = new QName("http://tempuri.org/", "ItemField", "tem");
         SOAPElement itemFieldElement = fieldsElement.addChildElement(itemFieldQName);
+        for (Map.Entry<String, String> entry : itemValueMap.entrySet()) {
+                        // Создание элемента FieldName
+            QName fieldNameQName = new QName("http://tempuri.org/", "FieldName", "tem");
+            SOAPElement fieldNameElement = itemFieldElement.addChildElement(fieldNameQName);
+            fieldNameElement.setTextContent(entry.getKey());
 
-        // Создание элемента FieldName
-        QName fieldNameQName = new QName("http://tempuri.org/", "FieldName", "tem");
-        SOAPElement fieldNameElement = itemFieldElement.addChildElement(fieldNameQName);
-        fieldNameElement.setTextContent("Название");
-
-        // Создание элемента FieldStringValue
-        QName fieldStringValueQName = new QName("http://tempuri.org/", "FieldStringValue", "tem");
-        SOAPElement fieldStringValueElement = itemFieldElement.addChildElement(fieldStringValueQName);
-        fieldStringValueElement.setTextContent("Отдел веб-разработки 3");
-
+            // Создание элемента FieldStringValue
+            QName fieldStringValueQName = new QName("http://tempuri.org/", "FieldStringValue", "tem");
+            SOAPElement fieldStringValueElement = itemFieldElement.addChildElement(fieldStringValueQName);
+            fieldStringValueElement.setTextContent(entry.getValue());
+        }
         soapMessage.saveChanges();
 
         return soapMessage;

@@ -13,5 +13,10 @@ dependencies {
     implementation("javax.xml.soap:javax.xml.soap-api:1.4.1")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     implementation("javax.xml.soap:javax.xml.soap-api:1.4.0")
+
+    implementation("com.google.code.gson:gson:2.10.1")
+    compileOnly("org.projectlombok:lombok:1.18.28")
+
+
 }
 

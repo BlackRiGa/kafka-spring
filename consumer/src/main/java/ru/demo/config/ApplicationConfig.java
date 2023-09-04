@@ -24,13 +24,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import ru.demo.model.StringValue;
 import ru.demo.service.SoapRequestSender;
-import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObject;
-import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObjects;
-import ru.demo.service.soapMessageFactory.SoapMessageFactoryUpdateObject;
 import ru.demo.service.stringValue.StringValueConsumer;
 import ru.demo.service.stringValue.StringValueConsumerLogger;
 
-import javax.xml.soap.SOAPMessage;
 import java.util.List;
 
 import static org.springframework.kafka.support.serializer.JsonDeserializer.TYPE_MAPPINGS;
@@ -92,48 +88,30 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public KafkaClient stringValueConsumer(StringValueConsumer stringValueConsumer, SoapRequestSender soapRequestSender, SoapMessageFactoryFindObjects soapMessageFactoryFindObjects, SoapMessageFactoryFindObject soapMessageFactoryFindObject, SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject) {
-        return new KafkaClient(stringValueConsumer, soapRequestSender, soapMessageFactoryFindObject, soapMessageFactoryFindObjects, soapMessageFactoryUpdateObject);
+    public KafkaClient stringValueConsumer(StringValueConsumer stringValueConsumer, SoapRequestSender soapRequest) {
+        return new KafkaClient(stringValueConsumer, soapRequest);
     }
 
     public static class KafkaClient {
         private final StringValueConsumer stringValueConsumer;
         private final SoapRequestSender soapRequestSender;
-        private final SoapMessageFactoryFindObject soapMessageFactoryFindObject;
-        private final SoapMessageFactoryFindObjects soapMessageFactoryFindObjects;
-        private final SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject;
 
-        public KafkaClient(StringValueConsumer stringValueConsumer, SoapRequestSender soapRequestSender, SoapMessageFactoryFindObject soapMessageFactoryFindObject, SoapMessageFactoryFindObjects soapMessageFactoryFindObjects, SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject) {
+
+
+        public KafkaClient(StringValueConsumer stringValueConsumer, SoapRequestSender soapRequestSender) {
             this.stringValueConsumer = stringValueConsumer;
             this.soapRequestSender = soapRequestSender;
-            this.soapMessageFactoryFindObject = soapMessageFactoryFindObject;
-            this.soapMessageFactoryFindObjects = soapMessageFactoryFindObjects;
-            this.soapMessageFactoryUpdateObject = soapMessageFactoryUpdateObject;
         }
 
         @KafkaListener(
                 topics = "${application.kafka.topic}",
                 containerFactory = "listenerContainerFactory")
         public void listen(@Payload List<StringValue> values) throws Exception {
-            int i = 2;
-
-            if (i == 0) {
-                SOAPMessage soapMessage = soapMessageFactoryFindObject.createSoapRequestFindObject();
-                System.out.println(soapRequestSender.sendSoapRequest(soapMessage));
-            }
-            if (i == 1) {
-                SOAPMessage soapMessage = soapMessageFactoryFindObjects.createSoapRequestFindObjects();
-                System.out.println(soapRequestSender.sendSoapRequest(soapMessage));
-            }
-            if (i == 2) {
-                SOAPMessage soapMessage = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest();
-                System.out.println(soapRequestSender.sendSoapRequest(soapMessage));
-            }
-//            if (i = 3) {
-//            }
-
             log.info("values, values.size:{}", values.size());
             stringValueConsumer.accept(values);
+            for(StringValue value: values){
+                soapRequestSender.choiceOfMethodAction(value);
+            }
         }
     }
 }

@@ -25,6 +25,42 @@ public class StringValueSource implements ValueSource {
 
     private StringValue makeValue() {
         var id = nextValue.getAndIncrement();
-        return new StringValue(id, "test message from producer");
+        return new StringValue(id, "{\n" +
+                "  \"url\":\"directions\",\n" +
+                "  \"status\": 200,\n" +
+                "  \"data\": [\n" +
+                "    {\n" +
+                "      \"id\": 65,\n" +
+                "      \"parent_id\": 6,\n" +
+                "      \"name\": \"ООО \\\"Бирюч\\\"\",\n" +
+                "      \"prefix\": \"Bir\",\n" +
+                "      \"is_not_active\": \"0\",\n" +
+                "      \"is_processed\": \"0\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"_links\": {\n" +
+                "    \"self\": {\n" +
+                "      \"href\": \"string\"\n" +
+                "    },\n" +
+                "    \"first\": {\n" +
+                "      \"href\": \"string\"\n" +
+                "    },\n" +
+                "    \"last\": {\n" +
+                "      \"href\": \"string\"\n" +
+                "    },\n" +
+                "    \"prev\": {\n" +
+                "      \"href\": \"string\"\n" +
+                "    },\n" +
+                "    \"next\": {\n" +
+                "      \"href\": \"string\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"_meta\": {\n" +
+                "    \"totalCount\": 0,\n" +
+                "    \"pageCount\": 0,\n" +
+                "    \"currentPage\": 0,\n" +
+                "    \"perPage\": 0\n" +
+                "  }\n" +
+                "}");
     }
 }

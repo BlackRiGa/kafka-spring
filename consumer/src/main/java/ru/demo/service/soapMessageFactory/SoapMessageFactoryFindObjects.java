@@ -7,7 +7,7 @@ import javax.xml.soap.*;
 
 @Component
 public class SoapMessageFactoryFindObjects {
-    public SOAPMessage createSoapRequestFindObjects() throws Exception {
+    public SOAPMessage createSoapRequestFindObjects(Integer listId, String valueName, int valueCode) throws Exception {
 
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage soapMessage = factory.createMessage();
@@ -24,12 +24,12 @@ public class SoapMessageFactoryFindObjects {
         // Создание элемента ListID
         QName listIdQName = new QName("http://tempuri.org/", "ListID", "tem");
         SOAPElement listIdElement = findObjectsElement.addChildElement(listIdQName);
-        listIdElement.setTextContent("3");
+        listIdElement.setTextContent(String.valueOf(listId));
 
         // Создание элемента Query
         QName queryQName = new QName("http://tempuri.org/", "Query", "tem");
         SOAPElement queryElement = findObjectsElement.addChildElement(queryQName);
-        queryElement.setTextContent("[Код]='3821'");
+        queryElement.setTextContent("[" + valueName + "]='" + valueCode + "'");
 
         // Создание элемента FieldNames
         QName fieldNamesQName = new QName("http://tempuri.org/", "FieldNames", "tem");
@@ -38,7 +38,7 @@ public class SoapMessageFactoryFindObjects {
         // Создание элемента string внутри FieldNames
         QName stringQName = new QName("http://tempuri.org/", "string", "tem");
         SOAPElement stringElement = fieldNamesElement.addChildElement(stringQName);
-        stringElement.setTextContent("Код");
+        stringElement.setTextContent(valueName);
 
         soapMessage.saveChanges();
 
