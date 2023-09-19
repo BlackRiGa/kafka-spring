@@ -15,7 +15,6 @@ public class SoapMessageFactoryFindObject {
 
         SOAPBody body = envelope.getBody();
 
-        // Создание элементов тела запроса, включая необходимые данные
         String findObjectLocalName = "FindObject";
         SOAPElement findObjectElement = body.addChildElement(findObjectLocalName, "tem", "http://tempuri.org/");
 

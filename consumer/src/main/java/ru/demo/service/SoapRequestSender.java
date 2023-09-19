@@ -1,5 +1,7 @@
 package ru.demo.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
@@ -20,7 +22,6 @@ import ru.demo.service.models.CompaniesRequestModel;
 import ru.demo.service.models.DirectionsRequestModel;
 import ru.demo.service.models.DivisionsRequestModel;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryCreateObject;
-import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObject;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObjects;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryUpdateObject;
 
@@ -63,19 +64,16 @@ public class SoapRequestSender {
 
         HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credsProvider).build();
 
-        HttpPost post = new HttpPost(addressRequest); //Provide Request URL
+        HttpPost post = new HttpPost(addressRequest);
 
         try {
             // Преобразуем SOAP-сообщение в массив байтов
             byte[] soapBytes = soapMessageConverter.convertSoapMessageToBytes(soapMessage);
-            // Устанавливаем заголовки
+            HttpEntity entity = new ByteArrayEntity(soapBytes);
+
             post.setHeader("Content-type", "application/soap+xml;charset=UTF-8");
             post.setHeader("SoapAction", "http://tempuri.org/FindObject"); // действие SoapAction
-            // Создаем HttpEntity из массива байтов SOAP-сообщения
-            HttpEntity entity = new ByteArrayEntity(soapBytes);
-            // Устанавливаем HttpEntity в HttpPost
             post.setEntity(entity);
-
             org.apache.http.HttpResponse response = client.execute(post);
 
             HttpEntity responseEntity = response.getEntity();
@@ -93,51 +91,60 @@ public class SoapRequestSender {
 
 
     public void choiceOfMethodAction(StringValue valueStr) throws Exception {
+        String url;
         String sample = valueStr.value();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(valueStr.value());
+            url = jsonNode.get("url").asText();
+            System.out.println("URL: " + url);
+        } catch (Exception e) {
+            url = "error";
+            e.printStackTrace();
+        }
 
-        if (valueStr.value().contains("directions")) {
-            System.out.println("choiceOfMethodAction = directions");
+        switch (url) {
+            case "directions":
+                System.out.println("choiceOfMethodAction = directions");
 
-            DirectionsRequestModel directions = DirectionsRequestModel.fromJson(sample);
+                DirectionsRequestModel directions = DirectionsRequestModel.fromJson(sample);
 
-            SOAPMessage soapMessageFound = soapMessageFactoryFindObjects.createSoapRequestFindObjects(453, "Код", directions.getData().get(0).getId());
-            System.out.println("soapMessageFound = " + sendSoapRequest(soapMessageFound));
+                System.out.println(directions.toString());
+                SOAPMessage soapMessageFound = soapMessageFactoryFindObjects.createSoapRequestFindObjects(453, "Код", directions.getData().get(0).getId());
+                System.out.println("soapMessageFound = " + sendSoapRequest(soapMessageFound));
 
-            if (soapMessageFound.getSOAPBody().getTextContent().contains("Код")) {
-                Integer itemId = 2841;
-                HashMap<String, String> hashValueMapForUpdate = new HashMap<>();
-                hashValueMapForUpdate.put("Название", directions.getData().get(0).getName());
-                SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(453, itemId, hashValueMapForUpdate);
-                System.out.println("soapMessageUpdated" + sendSoapRequest(soapMessageUpdated));
-            } else {
-                SOAPMessage soapMessageCreated = soapMessageFactoryCreateObject.createSoapRequest(453, directions.getData().get(0).getName(), directions.getData().get(0).getPrefix(), directions.getData().get(0).getId(), null, null);
-                System.out.println("soapMessageCreated" + sendSoapRequest(soapMessageCreated));
-            }
+                if (soapMessageFound.getSOAPBody().getTextContent().contains("Код")) {
+                    Integer itemId = 2841;
+                    HashMap<String, String> hashValueMapForUpdate = new HashMap<>();
+                    hashValueMapForUpdate.put("Название", directions.getData().get(0).getName());
+                    SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(453, itemId, hashValueMapForUpdate);
+                    System.out.println("soapMessageUpdated" + sendSoapRequest(soapMessageUpdated));
+                } else {
+                    SOAPMessage soapMessageCreated = soapMessageFactoryCreateObject.createSoapRequest(453, directions.getData().get(0).getName(), directions.getData().get(0).getPrefix(), directions.getData().get(0).getId(), null, null);
+                    System.out.println("soapMessageCreated" + sendSoapRequest(soapMessageCreated));
+                }
+                break;
+            case "divisions":
+                System.out.println("choiceOfMethodAction = divisions");
 
+                DivisionsRequestModel divisions = DivisionsRequestModel.fromJson(sample);
+                System.out.println(divisions.getData());
 
-        } else if (valueStr.value().contains("divisions")) {
+                SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(452, divisions.getData().get(0).getName(), divisions.getData().get(1).getPrefix(), divisions.getData().get(1).getId(), null, null);
+                System.out.println(sendSoapRequest(soapMessage));
 
+                break;
+            case "companies":
+                System.out.println("choiceOfMethodAction = companies");
 
-            System.out.println("choiceOfMethodAction = divisions");
+                CompaniesRequestModel companies = CompaniesRequestModel.fromJson(sample);
+                System.out.println(companies.getData());
 
-            DivisionsRequestModel divisions = DivisionsRequestModel.fromJson(sample);
-            System.out.println(divisions.getData());
-
-            SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(452, divisions.getData().get(0).getName(), divisions.getData().get(1).getPrefix(), divisions.getData().get(1).getId(), null, null);
-            System.out.println(sendSoapRequest(soapMessage));
-
-
-        } else if (valueStr.value().contains("companies")) {
-
-
-            System.out.println("choiceOfMethodAction = companies");
-
-            CompaniesRequestModel companies = CompaniesRequestModel.fromJson(sample);
-            System.out.println(companies.getData());
-
-            SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(105, companies.getData().get(0).getName(), companies.getData().get(0).getPrefix(), companies.getData().get(0).getId(), companies.getUrl(), companies.getData().get(0).getOrgCodeMdm());
-            System.out.println(sendSoapRequest(soapMessage));
-
+                SOAPMessage soapMessageCreateObject = soapMessageFactoryCreateObject.createSoapRequest(105, companies.getData().get(0).getName(), companies.getData().get(0).getPrefix(), companies.getData().get(0).getId(), companies.getUrl(), companies.getData().get(0).getOrgCodeMdm());
+                System.out.println(sendSoapRequest(soapMessageCreateObject));
+                break;
+            default:
+                System.out.println("error in switch-case");
 
         }
     }
