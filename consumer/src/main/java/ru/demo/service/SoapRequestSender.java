@@ -1,6 +1,7 @@
 package ru.demo.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import ru.demo.datahandler.IncomingDataHandler;
 import ru.demo.datahandler.JsonParser;
 import ru.demo.datahandler.XMLParser;
 import ru.demo.models.CompanyModelResponseFromHr;
+import ru.demo.models.DivisionsModelResponseFromHr;
 import ru.demo.service.models.DirectionsModelResponseFromHr;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryCreateObject;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObjects;
@@ -55,8 +57,8 @@ public class SoapRequestSender {
             if (!dataArray.isEmpty()) {
                 switch (booleanAddressHr) {
                     case "isCompany" -> handleCompanyModel(dataArray);
-                    case "isDirections" -> handleDirectionsModel(dataArray);
-                    case "isDivision" -> System.out.println("isDivision");
+                    case "isDirection" -> handleDirectionsModel(dataArray);
+                    case "isDivision" -> handleDivisionsModel(dataArray);
                     case "isStuff" -> System.out.println("isStuff");
                     case "isUnit" -> System.out.println("isUnit");
                     default -> log.info("Ошибка в операторе switch-case в методе choiceOfMethodAction");
@@ -99,6 +101,21 @@ public class SoapRequestSender {
         }
     }
 
+    private void handleDivisionsModel(JSONArray dataArray) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        DivisionsModelResponseFromHr divisionsModel = objectMapper.readValue(dataArray.getJSONObject(0).toString(), DivisionsModelResponseFromHr.class);
+        SOAPMessage soapMessageFindObjects = soapMessageFactoryFindObjects.createSoapRequestFindObjects(452, "Код", divisionsModel.getId());
+        String responseFromWSS = createrRequestToWSS.sendSoapRequest(soapMessageFindObjects);
+        log.info("responseFromWSS: " + responseFromWSS);
+        if (responseFromWSS.contains("<Fields>")) {
+            SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(452, xmlParser.returnItemIdFromWSS(responseFromWSS), handleDivisionsModel(divisionsModel));
+            log.info("responseFromWSSUpdateObject: " + createrRequestToWSS.sendSoapRequest(soapMessageUpdated));
+        } else {
+            SOAPMessage soapMessageCreateObject = soapMessageFactoryCreateObject.createSoapRequest(452, handleDivisionsModel(divisionsModel));
+            log.info("responseFromWSSCreateObject: " + createrRequestToWSS.sendSoapRequest(soapMessageCreateObject));
+        }
+    }
+
     private HashMap<String, String> handleCompanyModel(CompanyModelResponseFromHr companyModel) {
         HashMap<String, String> hashValueMapForCompany = new HashMap<>();
         hashValueMapForCompany.put("Название", companyModel.getName());
@@ -108,13 +125,48 @@ public class SoapRequestSender {
         return hashValueMapForCompany;
     }
 
-    private HashMap<String, String> handleDirectionsModel(DirectionsModelResponseFromHr directionsModel) {
+    private HashMap<String, String> handleDirectionsModel(DirectionsModelResponseFromHr directionsModel) throws Exception {
+        System.out.println(directionsModel);
         HashMap<String, String> hashValueMapForDirection = new HashMap<>();
         hashValueMapForDirection.put("Название", directionsModel.getName());
         hashValueMapForDirection.put("Префикс", directionsModel.getPrefix());
-        hashValueMapForDirection.put("Дивизион", String.valueOf(directionsModel.getParent_id()));
+
+
+
+        String test = dataHandler.requestToHR("isDivision", directionsModel.getParent_id());
+
+        JSONObject jsonObject = new JSONObject(test);
+        JSONArray dataArray = jsonObject.getJSONArray("data");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        DivisionsModelResponseFromHr divisionsModel = objectMapper.readValue(dataArray.getJSONObject(0).toString(), DivisionsModelResponseFromHr.class);
+        SOAPMessage soapMessageFindObjects = null;
+        try {
+            soapMessageFindObjects = soapMessageFactoryFindObjects.createSoapRequestFindObjects(452, "Код", divisionsModel.getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        String responseFromWSS = createrRequestToWSS.sendSoapRequest(soapMessageFindObjects);
+
+
+
+        hashValueMapForDirection.put("Дивизион", String.valueOf(xmlParser.returnItemIdFromWSS(responseFromWSS)));//TODO ИЗМЕНИТЬ НА ID ДИВИЗИОНА В WSS
         hashValueMapForDirection.put("Код", String.valueOf(directionsModel.getId()));
-        hashValueMapForDirection.put("Не актуален", directionsModel.getIsNotActive());
+        hashValueMapForDirection.put("Не актуален", String.valueOf(booleanActualFromHR(directionsModel.getIsNotActive())));
         return hashValueMapForDirection;
+    }
+
+    private Boolean booleanActualFromHR(String isNotActive) {
+        return !isNotActive.contains("0");
+    }
+
+    private HashMap<String, String> handleDivisionsModel(DivisionsModelResponseFromHr divisionsModel) {
+        HashMap<String, String> hashValueMapForDivision = new HashMap<>();
+        hashValueMapForDivision.put("Название", divisionsModel.getName());
+        hashValueMapForDivision.put("Префикс", divisionsModel.getPrefix());
+        hashValueMapForDivision.put("Код", String.valueOf(divisionsModel.getId()));
+        hashValueMapForDivision.put("Не актуален", String.valueOf(booleanActualFromHR(divisionsModel.getIsNotActive())));
+
+        return hashValueMapForDivision;
     }
 }

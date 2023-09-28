@@ -40,7 +40,7 @@ public class IncomingDataHandler {
 
         switch (value) {
             case "isCompany" -> endpoint = companiesUrl;
-            case "isDirections" -> endpoint = directionUrl;
+            case "isDirection" -> endpoint = directionUrl;
             case "isStuff" -> endpoint = staffUrl;
             case "isDivision" -> endpoint = divisionUrl;
             case "isUnit" -> endpoint = unitUrl;
@@ -58,11 +58,11 @@ public class IncomingDataHandler {
      * @param id    ID объекта
      * @return Ответ от HR
      */
-    public String requestToHR(String value, Integer id) {
+    public String requestToHR(String booleanAddressHr, Integer id) {
         StringBuilder response = new StringBuilder();
 
         try {
-            URL url = new URL(choiceUrlToHR(value, id));
+            URL url = new URL(choiceUrlToHR(booleanAddressHr, id));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("X-api-key", xAPIKey);

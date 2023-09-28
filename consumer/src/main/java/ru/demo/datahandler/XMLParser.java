@@ -41,8 +41,8 @@ public class XMLParser {
             log.error("Error parsing itemId to int: " + e.getMessage());
             throw new RuntimeException("Error parsing itemId to int", e);
         } catch (Exception e) {
-            log.error("An unexpected error occurred: " + e.getMessage());
-            throw new RuntimeException("An unexpected error occurred", e);
+            log.error("An unexpected error occurred in XMLParser: " + e.getMessage());
+            throw new RuntimeException("An unexpected error occurred in XMLParser", e);
         }
     }
 }

@@ -16,7 +16,7 @@ public class JsonParser {
     private static final Map<String, Function<JSONObject, String>> TYPE_MAP = new HashMap<>();
 
     static {
-        TYPE_MAP.put("isPerson", data -> "isPerson");
+        TYPE_MAP.put("isDirection", data -> "isDirection");
         TYPE_MAP.put("isCompany", data -> "isCompany");
         TYPE_MAP.put("isDivision", data -> "isDivision");
         TYPE_MAP.put("isStaff", data -> "isStaff");
