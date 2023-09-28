@@ -18,29 +18,23 @@ public class SoapMessageFactoryUpdateObject {
 
         SOAPBody body = envelope.getBody();
 
-        // Создание элемента UpdateObject
         QName updateObjectQName = new QName("http://tempuri.org/", "UpdateObject", "tem");
         SOAPElement updateObjectElement = body.addChildElement(updateObjectQName);
 
-        // Создание элемента ListID
         QName listIdQName = new QName("http://tempuri.org/", "ListID", "tem");
         SOAPElement listIdElement = updateObjectElement.addChildElement(listIdQName);
         listIdElement.setTextContent(String.valueOf(listId));
 
-        // Создание элемента ItemID
         QName itemIdQName = new QName("http://tempuri.org/", "ItemID", "tem");
         SOAPElement itemIdElement = updateObjectElement.addChildElement(itemIdQName);
         itemIdElement.setTextContent(String.valueOf(ItemId));
 
-        // Создание элемента Fields
         QName fieldsQName = new QName("http://tempuri.org/", "Fields", "tem");
         SOAPElement fieldsElement = updateObjectElement.addChildElement(fieldsQName);
 
-        // Создание элемента ItemField
         QName itemFieldQName = new QName("http://tempuri.org/", "ItemField", "tem");
         SOAPElement itemFieldElement = fieldsElement.addChildElement(itemFieldQName);
         for (Map.Entry<String, String> entry : itemValueMap.entrySet()) {
-                        // Создание элемента FieldName
             QName fieldNameQName = new QName("http://tempuri.org/", "FieldName", "tem");
             SOAPElement fieldNameElement = itemFieldElement.addChildElement(fieldNameQName);
             fieldNameElement.setTextContent(entry.getKey());

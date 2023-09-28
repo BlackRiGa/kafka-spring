@@ -1,7 +1,8 @@
 package ru.demo.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
@@ -12,15 +13,16 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.demo.model.StringValue;
 import ru.demo.service.converter.SoapMessageConverter;
 import ru.demo.service.datahandler.IncomingDataHandler;
-import ru.demo.service.models.CompaniesRequestModel;
-import ru.demo.service.models.DirectionsRequestModel;
-import ru.demo.service.models.DivisionsRequestModel;
+import ru.demo.service.datahandler.JsonParser;
+import ru.demo.service.datahandler.XMLParser;
+import ru.demo.service.models.CompanyModelResponseFromHr;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryCreateObject;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryFindObjects;
 import ru.demo.service.soapMessageFactory.SoapMessageFactoryUpdateObject;
@@ -30,13 +32,15 @@ import java.io.IOException;
 import java.util.HashMap;
 
 @Service
+@Slf4j
 public class SoapRequestSender {
     private final SoapMessageConverter soapMessageConverter;
     private final SoapMessageFactoryFindObjects soapMessageFactoryFindObjects;
     private final SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject;
     private final SoapMessageFactoryCreateObject soapMessageFactoryCreateObject;
     private final IncomingDataHandler dataHandler;
-
+    private final JsonParser jsonParser;
+    private final XMLParser xmlParser;
     @Value("${wss.host_name}")
     private String host_name;
     @Value("${wss.domain}")
@@ -46,15 +50,17 @@ public class SoapRequestSender {
     @Value("${wss.login}")
     private String login;
     @Value("${wss.addressRequest}")
-    private String addressRequest;
+    private String addressRequestToWss;
 
     @Autowired
-    public SoapRequestSender(SoapMessageConverter soapMessageConverter, SoapMessageFactoryFindObjects soapMessageFactoryFindObjects, SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject, SoapMessageFactoryCreateObject soapMessageFactoryCreateObject, IncomingDataHandler dataHandler) throws Exception {
+    public SoapRequestSender(SoapMessageConverter soapMessageConverter, SoapMessageFactoryFindObjects soapMessageFactoryFindObjects, SoapMessageFactoryUpdateObject soapMessageFactoryUpdateObject, SoapMessageFactoryCreateObject soapMessageFactoryCreateObject, IncomingDataHandler dataHandler, JsonParser jsonParser, XMLParser xmlParser) {
         this.soapMessageConverter = soapMessageConverter;
         this.soapMessageFactoryFindObjects = soapMessageFactoryFindObjects;
         this.soapMessageFactoryUpdateObject = soapMessageFactoryUpdateObject;
         this.soapMessageFactoryCreateObject = soapMessageFactoryCreateObject;
         this.dataHandler = dataHandler;
+        this.jsonParser = jsonParser;
+        this.xmlParser = xmlParser;
     }
 
     private String sendSoapRequest(SOAPMessage soapMessage) {
@@ -64,15 +70,14 @@ public class SoapRequestSender {
 
         HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credsProvider).build();
 
-        HttpPost post = new HttpPost(addressRequest);
+        HttpPost post = new HttpPost(addressRequestToWss);
 
         try {
-            // Преобразуем SOAP-сообщение в массив байтов
             byte[] soapBytes = soapMessageConverter.convertSoapMessageToBytes(soapMessage);
             HttpEntity entity = new ByteArrayEntity(soapBytes);
 
             post.setHeader("Content-type", "application/soap+xml;charset=UTF-8");
-            post.setHeader("SoapAction", "http://tempuri.org/FindObject"); // действие SoapAction
+            post.setHeader("SoapAction", "http://tempuri.org/FindObject");
             post.setEntity(entity);
             org.apache.http.HttpResponse response = client.execute(post);
 
@@ -90,62 +95,45 @@ public class SoapRequestSender {
     }
 
 
-    public void choiceOfMethodAction(StringValue valueStr) throws Exception {
-        String url;
-        String sample = valueStr.value();
+    public void choiceOfMethodAction(String key, String value) throws Exception {
+        String booleanAddressHr = jsonParser.returnBooleanData(value);
+        Integer idFromHr = jsonParser.returnId(value);
+        String responseFromHr = dataHandler.requestToHR(booleanAddressHr, idFromHr);
+
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(valueStr.value());
-            url = jsonNode.get("url").asText();
-            System.out.println("URL: " + url);
-        } catch (Exception e) {
-            url = "error";
-            e.printStackTrace();
-        }
+        JSONObject jsonObject = new JSONObject(responseFromHr);
 
-        switch (url) {
-            case "directions":
-                System.out.println("choiceOfMethodAction = directions");
+        switch (booleanAddressHr) {
+            case "isCompany" -> {
+                if (!jsonObject.get("data").toString().contains("[]")) {
+                    JSONArray dataArray = jsonObject.getJSONArray("data");
+                    CompanyModelResponseFromHr companyModel = objectMapper.readValue(dataArray.getJSONObject(0).toString(), CompanyModelResponseFromHr.class);
+                    SOAPMessage soapMessageFindObjects = soapMessageFactoryFindObjects.createSoapRequestFindObjects(105, "Код", companyModel.getId());
+                    String responseFromWSS = sendSoapRequest(soapMessageFindObjects);
 
-                DirectionsRequestModel directions = DirectionsRequestModel.fromJson(sample);
-
-                System.out.println(directions.toString());
-                SOAPMessage soapMessageFound = soapMessageFactoryFindObjects.createSoapRequestFindObjects(453, "Код", directions.getData().get(0).getId());
-                System.out.println("soapMessageFound = " + sendSoapRequest(soapMessageFound));
-
-                if (soapMessageFound.getSOAPBody().getTextContent().contains("Код")) {
-                    Integer itemId = 2841;
-                    HashMap<String, String> hashValueMapForUpdate = new HashMap<>();
-                    hashValueMapForUpdate.put("Название", directions.getData().get(0).getName());
-                    SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(453, itemId, hashValueMapForUpdate);
-                    System.out.println("soapMessageUpdated" + sendSoapRequest(soapMessageUpdated));
+                    if (responseFromWSS.contains("<OperationResult>true</OperationResult>")) {
+                        HashMap<String, String> hashValueMapForUpdate = new HashMap<>();
+                        hashValueMapForUpdate.put("Название", companyModel.getName());
+                        hashValueMapForUpdate.put("Префикс", companyModel.getPrefix());
+                        hashValueMapForUpdate.put("Код МДМ", String.valueOf(companyModel.getOrgCodeMdm()));
+                        hashValueMapForUpdate.put("Код", String.valueOf(companyModel.getId()));
+                        SOAPMessage soapMessageUpdated = soapMessageFactoryUpdateObject.createUpdateObjectSoapRequest(105, xmlParser.returnItemIdFromWSS(responseFromWSS), hashValueMapForUpdate);
+                        System.out.println("soapMessageUpdated" + sendSoapRequest(soapMessageUpdated));
+                    } else {
+                        SOAPMessage soapMessageCreateObject = soapMessageFactoryCreateObject.createSoapRequest("companies", 105, companyModel.getName(), companyModel.getPrefix(), companyModel.getId(), companyModel.getOrgCodeMdm());
+                        System.out.println(soapMessageCreateObject);
+                        sendSoapRequest(soapMessageCreateObject);
+                    }
                 } else {
-                    SOAPMessage soapMessageCreated = soapMessageFactoryCreateObject.createSoapRequest(453, directions.getData().get(0).getName(), directions.getData().get(0).getPrefix(), directions.getData().get(0).getId(), null, null);
-                    System.out.println("soapMessageCreated" + sendSoapRequest(soapMessageCreated));
+                    log.info("Data from hr in id:" + jsonParser.returnId(value) + "is null");
                 }
-                break;
-            case "divisions":
-                System.out.println("choiceOfMethodAction = divisions");
-
-                DivisionsRequestModel divisions = DivisionsRequestModel.fromJson(sample);
-                System.out.println(divisions.getData());
-
-                SOAPMessage soapMessage = soapMessageFactoryCreateObject.createSoapRequest(452, divisions.getData().get(0).getName(), divisions.getData().get(1).getPrefix(), divisions.getData().get(1).getId(), null, null);
-                System.out.println(sendSoapRequest(soapMessage));
-
-                break;
-            case "companies":
-                System.out.println("choiceOfMethodAction = companies");
-
-                CompaniesRequestModel companies = CompaniesRequestModel.fromJson(sample);
-                System.out.println(companies.getData());
-
-                SOAPMessage soapMessageCreateObject = soapMessageFactoryCreateObject.createSoapRequest(105, companies.getData().get(0).getName(), companies.getData().get(0).getPrefix(), companies.getData().get(0).getId(), companies.getUrl(), companies.getData().get(0).getOrgCodeMdm());
-                System.out.println(sendSoapRequest(soapMessageCreateObject));
-                break;
-            default:
-                System.out.println("error in switch-case");
-
+            }
+            case "isStuff" -> System.out.println("isStuff");
+            case "isUnit" -> System.out.println("isUnit");
+            default -> {
+                System.out.println(responseFromHr);
+                log.info("error in switch-case in choiceOfMethodAction");
+            }
         }
     }
 }

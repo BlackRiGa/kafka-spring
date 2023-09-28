@@ -15,7 +15,10 @@ dependencies {
     implementation("javax.xml.soap:javax.xml.soap-api:1.4.0")
 
     implementation("com.google.code.gson:gson:2.10.1")
-    compileOnly("org.projectlombok:lombok:1.18.28")
+
+    implementation("org.json:json:20230618")
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compileOnly("org.projectlombok:lombok:1.18.30")
 
 
 }
