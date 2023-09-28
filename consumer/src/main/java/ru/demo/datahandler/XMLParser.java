@@ -1,6 +1,7 @@
-package ru.demo.service.datahandler;
+package ru.demo.datahandler;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -13,8 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
 @Component
-@Slf4j
 public class XMLParser {
+    private static final Logger log = LoggerFactory.getLogger(XMLParser.class);
     public int returnItemIdFromWSS(String xmlString) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

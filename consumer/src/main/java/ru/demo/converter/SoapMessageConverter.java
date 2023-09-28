@@ -1,4 +1,4 @@
-package ru.demo.service.converter;
+package ru.demo.converter;
 
 import org.springframework.stereotype.Component;
 

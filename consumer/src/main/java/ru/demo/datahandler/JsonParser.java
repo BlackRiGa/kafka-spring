@@ -1,7 +1,9 @@
-package ru.demo.service.datahandler;
-import lombok.extern.slf4j.Slf4j;
+package ru.demo.datahandler;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -9,8 +11,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-@Slf4j
 public class JsonParser {
+    private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
     private static final Map<String, Function<JSONObject, String>> TYPE_MAP = new HashMap<>();
 
     static {

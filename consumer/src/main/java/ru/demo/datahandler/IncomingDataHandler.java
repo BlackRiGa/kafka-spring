@@ -1,6 +1,7 @@
-package ru.demo.service.datahandler;
+package ru.demo.datahandler;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +11,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @Service
-@Slf4j
 public class IncomingDataHandler {
+    private static final Logger log = LoggerFactory.getLogger(IncomingDataHandler.class);
     @Value("${spring.application.url.companies}")
     private String companiesUrl;
     @Value("${spring.application.url.unit}")

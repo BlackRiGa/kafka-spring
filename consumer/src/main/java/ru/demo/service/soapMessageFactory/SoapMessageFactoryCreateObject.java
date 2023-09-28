@@ -3,10 +3,12 @@ package ru.demo.service.soapMessageFactory;
 import org.springframework.stereotype.Component;
 
 import javax.xml.soap.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SoapMessageFactoryCreateObject {
-    public SOAPMessage createSoapRequest(String typeUnit, Integer listId, String name, String prefix, Integer code, Integer codeMDM) throws SOAPException {
+    public SOAPMessage createSoapRequest( Integer listId, HashMap<String, String> itemFieldsMap) throws SOAPException {
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage soapMessage = factory.createMessage();
         SOAPPart soapPart = soapMessage.getSOAPPart();
@@ -23,12 +25,8 @@ public class SoapMessageFactoryCreateObject {
 
         SOAPElement itemFieldsElement = createObjectElement.addChildElement("ItemFields", "ns1");
 
-        createItemField(itemFieldsElement, "Название", name);
-        createItemField(itemFieldsElement, "Префикс", prefix);
-        createItemField(itemFieldsElement, "Код", String.valueOf(code));
-
-        if (typeUnit.equals("companies")) {
-            createItemField(itemFieldsElement, "Код МДМ", String.valueOf(codeMDM));
+        for (Map.Entry<String, String> entry : itemFieldsMap.entrySet()) {
+            createItemField(itemFieldsElement, entry.getKey(), entry.getValue());
         }
 
         soapMessage.saveChanges();

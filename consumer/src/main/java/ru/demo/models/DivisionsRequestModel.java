@@ -1,20 +1,20 @@
-package ru.demo.service.models;
+package ru.demo.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.*;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class DirectionsRequestModel {
+@Getter
+@Setter
+@EqualsAndHashCode
+@AllArgsConstructor
+public class DivisionsRequestModel {
     private String url;
     private int status;
     private List<DataItem> data;
-    private Map<String, String> _links;
+    private Links _links;
     private Meta _meta;
 
     public String getUrl() {
@@ -42,12 +42,12 @@ public class DirectionsRequestModel {
     }
 
     @JsonProperty("_links")
-    public Map<String, String> getLinks() {
+    public Links getLinks() {
         return _links;
     }
 
     @JsonProperty("_links")
-    public void setLinks(Map<String, String> _links) {
+    public void setLinks(Links _links) {
         this._links = _links;
     }
 
@@ -63,7 +63,7 @@ public class DirectionsRequestModel {
 
     @Override
     public String toString() {
-        return "JsonResponseModel{" +
+        return "DivisionResponseModel{" +
                 "url='" + url + '\'' +
                 ", status=" + status +
                 ", data=" + data +
@@ -71,18 +71,11 @@ public class DirectionsRequestModel {
                 ", _meta=" + _meta +
                 '}';
     }
-
-    public static DirectionsRequestModel fromJson(String jsonString) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        DirectionsRequestModel directionsRequestModel = null;
-        try {
-            directionsRequestModel = objectMapper.readValue(jsonString, DirectionsRequestModel.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return directionsRequestModel;
+    public static DivisionsRequestModel fromJson(String jsonString) {
+        Gson gson = new Gson();
+        System.out.println(jsonString);
+        return gson.fromJson(jsonString, DivisionsRequestModel.class);
     }
-
     public static class DataItem {
         private int id;
         private int parent_id;
@@ -148,6 +141,65 @@ public class DirectionsRequestModel {
                     ", prefix='" + prefix + '\'' +
                     ", is_not_active='" + is_not_active + '\'' +
                     ", is_processed='" + is_processed + '\'' +
+                    '}';
+        }
+    }
+
+    public static class Links {
+        private String self;
+        private String first;
+        private String last;
+        private String prev;
+        private String next;
+
+        public String getSelf() {
+            return self;
+        }
+
+        public void setSelf(String self) {
+            this.self = self;
+        }
+
+        public String getFirst() {
+            return first;
+        }
+
+        public void setFirst(String first) {
+            this.first = first;
+        }
+
+        public String getLast() {
+            return last;
+        }
+
+        public void setLast(String last) {
+            this.last = last;
+        }
+
+        public String getPrev() {
+            return prev;
+        }
+
+        public void setPrev(String prev) {
+            this.prev = prev;
+        }
+
+        public String getNext() {
+            return next;
+        }
+
+        public void setNext(String next) {
+            this.next = next;
+        }
+
+        @Override
+        public String toString() {
+            return "Links{" +
+                    "self='" + self + '\'' +
+                    ", first='" + first + '\'' +
+                    ", last='" + last + '\'' +
+                    ", prev='" + prev + '\'' +
+                    ", next='" + next + '\'' +
                     '}';
         }
     }

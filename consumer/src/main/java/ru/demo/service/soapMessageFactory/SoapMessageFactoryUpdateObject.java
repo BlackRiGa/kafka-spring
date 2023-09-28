@@ -39,7 +39,6 @@ public class SoapMessageFactoryUpdateObject {
             SOAPElement fieldNameElement = itemFieldElement.addChildElement(fieldNameQName);
             fieldNameElement.setTextContent(entry.getKey());
 
-            // Создание элемента FieldStringValue
             QName fieldStringValueQName = new QName("http://tempuri.org/", "FieldStringValue", "tem");
             SOAPElement fieldStringValueElement = itemFieldElement.addChildElement(fieldStringValueQName);
             fieldStringValueElement.setTextContent(entry.getValue());
