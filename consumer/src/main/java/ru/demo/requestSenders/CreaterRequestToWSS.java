@@ -1,4 +1,4 @@
-package ru.demo.service;
+package ru.demo.requestSenders;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -48,7 +48,7 @@ public class CreaterRequestToWSS {
         return HttpClientBuilder.create().setDefaultCredentialsProvider(credsProvider).build();
     }
 
-    String sendSoapRequest(SOAPMessage soapMessage) {
+    public String sendSoapRequest(SOAPMessage soapMessage) {
         try (CloseableHttpClient client = createHttpClient()) {
             HttpPost post = new HttpPost(addressRequestToWss);
             byte[] soapBytes = soapMessageConverter.convertSoapMessageToBytes(soapMessage);

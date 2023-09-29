@@ -1,4 +1,4 @@
-package ru.demo.datahandler;
+package ru.demo.parsers;
 
 import org.json.JSONException;
 import org.json.JSONObject;

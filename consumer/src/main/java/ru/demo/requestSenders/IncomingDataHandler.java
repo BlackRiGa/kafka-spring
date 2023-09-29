@@ -1,4 +1,4 @@
-package ru.demo.datahandler;
+package ru.demo.requestSenders;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class IncomingDataHandler {
     /**
      * Отправка запроса в HR и получение ответа.
      *
-     * @param value Тип объекта
+     * @param booleanAddressHr Тип объекта
      * @param id    ID объекта
      * @return Ответ от HR
      */
